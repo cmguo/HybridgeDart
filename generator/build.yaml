@@ -1,0 +1,9 @@
+builders:
+  retrofit:
+    target: ":hybridge"
+    import: "package:hybridge_generator/hybridge_generator.dart"
+    builder_factories: ["hybridgeBuilder"]
+    build_extensions: { ".dart": [".hybridge.g.part"] }
+    auto_apply: dependents
+    build_to: cache
+    applies_builders: ["source_gen|combining_builder"]

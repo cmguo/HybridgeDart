@@ -1,0 +1,5 @@
+.dart_tool
+.packages
+*.g.dart
+*.lock
+/.vscode
