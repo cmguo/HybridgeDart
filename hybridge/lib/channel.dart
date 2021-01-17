@@ -1,15 +1,16 @@
 import 'dart:ffi';
+import 'dart:io';
 import 'package:ffi/ffi.dart';
 
-import 'src/channelc.dart';
-import 'src/hybridgec.dart';
+import 'src/channels.dart';
+import 'src/hybridge.dart';
 import 'src/handleptr.dart';
-import 'src/objects.dart';
+import 'src/proxyobject.dart';
 import 'src/meta.dart';
 import 'transport.dart';
 
 class Channel {
-  static Pointer<ChannelStub> stub = Hybridge.instance.channelStub;
+  static Pointer<ChannelStub> stub = Hybridge.channelStub;
 
   Pointer<Void> handle;
   Handle callback;
@@ -18,18 +19,18 @@ class Channel {
   Pointer<Utf8> uuid;
 
   Channel() {
-    callback = ChannelCallbackStub.newCallback(this);
+    callback = Hybridge.channels.alloc(this);
     handle = stub.ref.create.asFunction<d_createChannel>()(callback.addressOf);
   }
 
   void registerObject(String name, dynamic object) {
-    stub.ref.registerObject.asFunction<d_registerObject>()(
-        handle, Utf8.toUtf8(name), Objects.get(object).cast<Void>());
+    stub.ref.registerObject.asFunction<d_registerObject>()(handle,
+        Utf8.toUtf8(name), Hybridge.objects.alloc(object).addressOf.cast());
   }
 
   void deregisterObject(String name, dynamic object) {
     stub.ref.deregisterObject.asFunction<d_deregisterObject>()(
-        handle, Objects.get(object).cast());
+        handle, Hybridge.objects[object]);
   }
 
   bool blockUpdates() {
@@ -41,9 +42,9 @@ class Channel {
         handle, block ? 1 : 0);
   }
 
-  void connectTo(Transport transport, Handle response) {
-    stub.ref.connectTo.asFunction<d_connectTo>()(
-        handle, transport.callback.addressOf.cast(), response.addressOf);
+  void connectTo(Transport transport, {OnResult response = null}) {
+    stub.ref.connectTo.asFunction<d_connectTo>()(handle, transport.handle,
+        response == null ? nullptr : Hybridge.responses.alloc(response));
   }
 
   void disconnectFrom(Transport transport) {
@@ -59,19 +60,21 @@ class Channel {
     return stub.ref.free.asFunction<d_freeChannel>()(handle);
   }
 
-  Pointer<Handle> metaObject(Pointer<Handle> object) {
-    Object o = Objects.find(object);
-    return MetaObject.get(o.runtimeType);
+  MetaObject metaObject(Object object) {
+    return MetaObject.get(object.runtimeType);
   }
 
-  Pointer<Utf8> createUuid() {
-    uuid = Utf8.toUtf8("O${id++}");
-    return uuid;
+  String createUuid() {
+    return "O${id++}";
   }
 
-  Pointer<Handle> createProxyObject(Pointer<Handle> object) {}
+  ProxyObject createProxyObject(Pointer<Handle> object) {
+    return ProxyObject(object);
+  }
 
-  void startTimer(int msec) {}
+  void startTimer(int msec) {
+    stdout.writeln("startTimer: ${msec}");
+  }
 
   void stopTimer() {}
 }

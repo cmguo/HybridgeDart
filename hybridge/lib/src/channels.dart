@@ -2,66 +2,60 @@ import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 
 import 'handleptr.dart';
+import 'hybridge.dart';
 import '../channel.dart';
 
 /* Callback */
 
-typedef c_metaObject = Pointer<Handle> Function(
+typedef f_metaObject = Pointer<Handle> Function(
     Pointer<Handle> handle, Pointer<Handle> object);
-typedef c_createUuid = Pointer<Utf8> Function(Pointer<Handle> handle);
-typedef c_createProxyObject = Pointer<Handle> Function(
+typedef f_createUuid = Pointer<Utf8> Function(Pointer<Handle> handle);
+typedef f_createProxyObject = Pointer<Handle> Function(
     Pointer<Handle> handle, Pointer<Handle> object);
-typedef c_startTimer = Void Function(Pointer<Handle> handle, IntPtr msec);
-typedef c_stopTimer = Void Function(Pointer<Handle> handle);
+typedef f_startTimer = Void Function(Pointer<Handle> handle, IntPtr msec);
+typedef f_stopTimer = Void Function(Pointer<Handle> handle);
 
 class ChannelCallbackStub extends Struct {
-  static final instance = ChannelCallbackStub();
-  static final Map<Pointer<Handle>, Channel> channels = Map();
-
-  static Handle newCallback(Channel channel) {
-    final callback = Handle.fromCallback(ChannelCallbackStub.instance);
-    channels[callback.addressOf] = channel;
-    return callback;
-  }
-
-  static void freeCallback(Handle callback) {
-    channels.remove(callback.addressOf);
-  }
-
   static Pointer<Handle> _metaObject(
       Pointer<Handle> handle, Pointer<Handle> object) {
-    return channels[handle].metaObject(object);
+    return Hybridge.channels[handle]
+        .metaObject(Hybridge.objects[object])
+        .callback
+        .addressOf;
   }
 
   static Pointer<Utf8> _createUuid(Pointer<Handle> handle) {
-    return channels[handle].createUuid();
+    return Utf8.toUtf8(Hybridge.channels[handle].createUuid());
   }
 
   static Pointer<Handle> _createProxyObject(
       Pointer<Handle> handle, Pointer<Handle> object) {
-    return channels[handle].createProxyObject(object);
+    Hybridge.channels[handle].createProxyObject(object);
+    return handle;
   }
 
   static void _startTimer(Pointer<Handle> handle, int msec) {
-    return channels[handle].startTimer(msec);
+    return Hybridge.channels[handle].startTimer(msec);
   }
 
   static void _stopTimer(Pointer<Handle> handle) {
-    return channels[handle].stopTimer();
+    return Hybridge.channels[handle].stopTimer();
   }
 
-  Pointer<NativeFunction<c_metaObject>> metaObject;
-  Pointer<NativeFunction<c_createUuid>> createUuid;
-  Pointer<NativeFunction<c_createProxyObject>> createProxyObject;
-  Pointer<NativeFunction<c_startTimer>> startTimer;
-  Pointer<NativeFunction<c_stopTimer>> stopTimer;
+  Pointer<NativeFunction<f_metaObject>> metaObject;
+  Pointer<NativeFunction<f_createUuid>> createUuid;
+  Pointer<NativeFunction<f_createProxyObject>> createProxyObject;
+  Pointer<NativeFunction<f_startTimer>> startTimer;
+  Pointer<NativeFunction<f_stopTimer>> stopTimer;
 
-  ChannelCallbackStub() {
-    metaObject = Pointer.fromFunction(_metaObject);
-    createUuid = Pointer.fromFunction(_createUuid);
-    createProxyObject = Pointer.fromFunction(_createProxyObject);
-    startTimer = Pointer.fromFunction(_startTimer);
-    stopTimer = Pointer.fromFunction(_stopTimer);
+  factory ChannelCallbackStub.alloc() {
+    ChannelCallbackStub stub = Hybridge.alloc<ChannelCallbackStub>();
+    stub.metaObject = Pointer.fromFunction(_metaObject);
+    stub.createUuid = Pointer.fromFunction(_createUuid);
+    stub.createProxyObject = Pointer.fromFunction(_createProxyObject);
+    stub.startTimer = Pointer.fromFunction(_startTimer);
+    stub.stopTimer = Pointer.fromFunction(_stopTimer);
+    return stub;
   }
 }
 

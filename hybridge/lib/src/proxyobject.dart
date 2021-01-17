@@ -2,6 +2,7 @@ import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 
 import 'handleptr.dart';
+import 'hybridge.dart';
 
 /* MetaObject Callback */
 
@@ -35,20 +36,59 @@ class ProxyObjectStub extends Struct {
   Pointer<NativeFunction<c_invokeMethod>> invokeMethod;
 }
 
-abstract class OnResult
-{
-    void apply(Pointer<Void> result);
+typedef c_onResult = Void Function(
+    Pointer<Handle> handle, Pointer<Void> result);
+
+typedef void d_onResult(Pointer<Void> result);
+
+typedef void OnResult(Pointer<Void> result);
+
+class OnResultCallbackStub extends Struct {
+  static void _apply(Pointer<Handle> handle, Pointer<Void> result) {
+    return Hybridge.responses[handle](result);
+  }
+
+  Pointer<NativeFunction<c_onResult>> apply;
+  factory OnResultCallbackStub.alloc() {
+    OnResultCallbackStub stub = Hybridge.alloc<OnResultCallbackStub>();
+    stub.apply = Pointer.fromFunction(_apply);
+    return stub;
+  }
 }
 
-abstract class SignalHandler
-{
-    void apply(ProxyObject object, int signalIndex, Pointer<Pointer<Void>> args);
+typedef c_onSignal = Void Function(Pointer<Handle> handle,
+    Pointer<Handle> object, int signalIndex, Pointer<Pointer<Void>> args);
+
+typedef void d_onSignal(Pointer<Handle> handle, Pointer<Handle> object,
+    int signalIndex, Pointer<Pointer<Void>> args);
+
+typedef void OnSignal(
+    ProxyObject object, int signalIndex, Pointer<Pointer<Void>> args);
+
+class OnSignalCallbackStub extends Struct {
+  static void _apply(Pointer<Handle> handle, Pointer<Handle> object,
+      int signalIndex, Pointer<Pointer<Void>> args) {
+    return Hybridge.signalHandlers[handle](
+        Hybridge.objects[object] as ProxyObject, signalIndex, args);
+  }
+
+  Pointer<NativeFunction<c_onSignal>> apply;
+  factory OnSignalCallbackStub.alloc() {
+    OnSignalCallbackStub stub = Hybridge.alloc<OnSignalCallbackStub>();
+    stub.apply = Pointer.fromFunction(_apply);
+    return stub;
+  }
 }
 
 class ProxyObject {
-
   Pointer<Handle> handle;
   Pointer<ProxyObjectStub> stub;
 
-  bool invokeMethod(String name, Pointer<Pointer<Void>> args, SignalHandler resp)
+  ProxyObject(this.handle) {
+    stub = handle.ref.callback.cast();
+  }
+
+  bool invokeMethod(String name, Pointer<Pointer<Void>> args, OnSignal resp) {
+    return false;
+  }
 }

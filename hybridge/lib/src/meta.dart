@@ -2,6 +2,7 @@ import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 
 import 'handleptr.dart';
+import 'hybridge.dart';
 
 /* MetaObject Callback */
 
@@ -18,32 +19,26 @@ typedef f_invokeMethod = IntPtr Function(
     Pointer<Void> result);
 
 class MetaObjectCallbackStub extends Struct {
-  static final instance = MetaObjectCallbackStub();
-  static final Map<Pointer<Handle>, MetaObject> metaObjs = Map();
-
-  static Handle newCallback(MetaObject metaObject) {
-    final callback = Handle.fromCallback(MetaObjectCallbackStub.instance);
-    metaObjs[callback.addressOf] = metaObject;
-    return callback;
-  }
-
   static Pointer<Utf8> _metaData(Pointer<Handle> handle) {
-    return metaObjs[handle].metaData;
+    return Hybridge.metaObjects[handle].metaData;
   }
 
   static int _readProperty(Pointer<Handle> handle, Pointer<Handle> object,
       int propertyIndex, Pointer<Void> result) {
-    return metaObjs[handle].readProperty(object, propertyIndex, result);
+    return Hybridge.metaObjects[handle]
+        .readProperty(object, propertyIndex, result);
   }
 
   static int _writeProperty(Pointer<Handle> handle, Pointer<Handle> object,
       int propertyIndex, Pointer<Void> result) {
-    return metaObjs[handle].writeProperty(object, propertyIndex, result);
+    return Hybridge.metaObjects[handle]
+        .writeProperty(object, propertyIndex, result);
   }
 
   static int _invokeMethod(Pointer<Handle> handle, Pointer<Handle> object,
       int methodIndex, Pointer<Pointer<Void>> args, Pointer<Void> result) {
-    return metaObjs[handle].invokeMethod(object, methodIndex, args, result);
+    return Hybridge.metaObjects[handle]
+        .invokeMethod(object, methodIndex, args, result);
   }
 
   Pointer<NativeFunction<f_metaData>> metaData;
@@ -51,11 +46,13 @@ class MetaObjectCallbackStub extends Struct {
   Pointer<NativeFunction<f_writeProperty>> writeProperty;
   Pointer<NativeFunction<f_invokeMethod>> invokeMethod;
 
-  MetaObjectCallbackStub() {
-    metaData = Pointer.fromFunction(_metaData);
-    readProperty = Pointer.fromFunction(_readProperty, 0);
-    writeProperty = Pointer.fromFunction(_writeProperty, 0);
-    invokeMethod = Pointer.fromFunction(_invokeMethod, 0);
+  factory MetaObjectCallbackStub.alloc() {
+    MetaObjectCallbackStub stub = Hybridge.alloc<MetaObjectCallbackStub>();
+    stub.metaData = Pointer.fromFunction(_metaData);
+    stub.readProperty = Pointer.fromFunction(_readProperty, 0);
+    stub.writeProperty = Pointer.fromFunction(_writeProperty, 0);
+    stub.invokeMethod = Pointer.fromFunction(_invokeMethod, 0);
+    return stub;
   }
 }
 
@@ -68,15 +65,15 @@ abstract class MetaObject {
     metaObjs[type] = metaObj;
   }
 
-  static Pointer<Handle> get(Type type) {
-    return metaObjs[type].callback.addressOf;
+  static MetaObject get(Type type) {
+    return metaObjs[type];
   }
 
   Handle callback;
   Pointer<Utf8> metaData;
 
   MetaObject(String meta) {
-    callback = MetaObjectCallbackStub.newCallback(this);
+    callback = Hybridge.metaObjects.alloc(this);
     metaData = Utf8.toUtf8(meta);
   }
 
