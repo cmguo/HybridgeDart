@@ -2,8 +2,7 @@ import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 
 import 'handleptr.dart';
-import 'hybridge.dart';
-import '../transport.dart';
+import 'hybridgec.dart';
 
 /* Callback */
 
@@ -12,13 +11,13 @@ typedef f_sendMessage = Void Function(
 
 class TransportCallbackStub extends Struct {
   static void _sendMessage(Pointer<Handle> handle, Pointer<Utf8> message) {
-    return Hybridge.transports[handle].sendMessage(Utf8.fromUtf8(message));
+    return HandleSet.transports[handle].sendMessage(Utf8.fromUtf8(message));
   }
 
   Pointer<NativeFunction<f_sendMessage>> sendMessage;
 
   factory TransportCallbackStub.alloc() {
-    TransportCallbackStub stub = Hybridge.alloc<TransportCallbackStub>();
+    TransportCallbackStub stub = Hybridge.alloc<TransportCallbackStub>().ref;
     stub.sendMessage = Pointer.fromFunction(_sendMessage);
     return stub;
   }

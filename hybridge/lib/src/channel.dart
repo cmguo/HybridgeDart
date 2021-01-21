@@ -2,35 +2,35 @@ import 'dart:ffi';
 import 'dart:io';
 import 'package:ffi/ffi.dart';
 
-import 'src/channels.dart';
-import 'src/hybridge.dart';
-import 'src/handleptr.dart';
-import 'src/proxyobject.dart';
-import 'src/meta.dart';
+import 'channels.dart';
+import 'hybridgec.dart';
+import 'handleptr.dart';
+import 'proxyobject.dart';
+import 'meta.dart';
 import 'transport.dart';
 
 class Channel {
   static Pointer<ChannelStub> stub = Hybridge.channelStub;
 
   Pointer<Void> handle;
-  Handle callback;
+  Pointer<Handle> callback;
 
   int id;
   Pointer<Utf8> uuid;
 
   Channel() {
-    callback = Hybridge.channels.alloc(this);
-    handle = stub.ref.create.asFunction<d_createChannel>()(callback.addressOf);
+    callback = HandleSet.channels.alloc(this);
+    handle = stub.ref.create.asFunction<d_createChannel>()(callback);
   }
 
-  void registerObject(String name, dynamic object) {
+  void registerObject(String name, Object object) {
     stub.ref.registerObject.asFunction<d_registerObject>()(handle,
-        Utf8.toUtf8(name), Hybridge.objects.alloc(object).addressOf.cast());
+        Utf8.toUtf8(name), HandleSet.nativeObjects.alloc(object).cast());
   }
 
-  void deregisterObject(String name, dynamic object) {
+  void deregisterObject(String name, Object object) {
     stub.ref.deregisterObject.asFunction<d_deregisterObject>()(
-        handle, Hybridge.objects[object]);
+        handle, HandleSet.nativeObjects.freeObject(object).cast());
   }
 
   bool blockUpdates() {
@@ -44,12 +44,12 @@ class Channel {
 
   void connectTo(Transport transport, {OnResult response = null}) {
     stub.ref.connectTo.asFunction<d_connectTo>()(handle, transport.handle,
-        response == null ? nullptr : Hybridge.responses.alloc(response));
+        response == null ? nullptr : HandleSet.responses.alloc(response));
   }
 
   void disconnectFrom(Transport transport) {
     stub.ref.disconnectFrom.asFunction<d_disconnectFrom>()(
-        handle, transport.callback.addressOf.cast());
+        handle, transport.handle);
   }
 
   void timerEvent() {

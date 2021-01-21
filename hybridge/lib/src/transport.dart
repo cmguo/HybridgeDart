@@ -2,20 +2,19 @@ import 'dart:ffi';
 import 'dart:io';
 import 'package:ffi/ffi.dart';
 
-import 'src/hybridge.dart';
-import 'src/transports.dart';
-import 'src/handleptr.dart';
+import 'hybridgec.dart';
+import 'transports.dart';
+import 'handleptr.dart';
 
 class Transport {
   static Pointer<TransportStub> stub = Hybridge.transportStub;
 
   Pointer<void> handle;
-  Handle callback;
+  Pointer<Handle> callback;
 
   Transport() {
-    callback = Hybridge.transports.alloc(this);
-    handle =
-        stub.ref.create.asFunction<d_createTransport>()(callback.addressOf);
+    callback = HandleSet.transports.alloc(this);
+    handle = stub.ref.create.asFunction<d_createTransport>()(callback);
   }
 
   void messageReceived(String message) {

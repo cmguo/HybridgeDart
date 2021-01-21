@@ -2,8 +2,7 @@ import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 
 import 'handleptr.dart';
-import 'hybridge.dart';
-import '../channel.dart';
+import 'hybridgec.dart';
 
 /* Callback */
 
@@ -18,28 +17,27 @@ typedef f_stopTimer = Void Function(Pointer<Handle> handle);
 class ChannelCallbackStub extends Struct {
   static Pointer<Handle> _metaObject(
       Pointer<Handle> handle, Pointer<Handle> object) {
-    return Hybridge.channels[handle]
-        .metaObject(Hybridge.objects[object])
-        .callback
-        .addressOf;
+    return HandleSet.channels[handle]
+        .metaObject(HandleSet.nativeObjects[object])
+        .callback;
   }
 
   static Pointer<Utf8> _createUuid(Pointer<Handle> handle) {
-    return Utf8.toUtf8(Hybridge.channels[handle].createUuid());
+    return Utf8.toUtf8(HandleSet.channels[handle].createUuid());
   }
 
   static Pointer<Handle> _createProxyObject(
       Pointer<Handle> handle, Pointer<Handle> object) {
-    Hybridge.channels[handle].createProxyObject(object);
-    return handle;
+    HandleSet.channels[handle].createProxyObject(object);
+    return object;
   }
 
   static void _startTimer(Pointer<Handle> handle, int msec) {
-    return Hybridge.channels[handle].startTimer(msec);
+    return HandleSet.channels[handle].startTimer(msec);
   }
 
   static void _stopTimer(Pointer<Handle> handle) {
-    return Hybridge.channels[handle].stopTimer();
+    return HandleSet.channels[handle].stopTimer();
   }
 
   Pointer<NativeFunction<f_metaObject>> metaObject;
@@ -49,7 +47,7 @@ class ChannelCallbackStub extends Struct {
   Pointer<NativeFunction<f_stopTimer>> stopTimer;
 
   factory ChannelCallbackStub.alloc() {
-    ChannelCallbackStub stub = Hybridge.alloc<ChannelCallbackStub>();
+    ChannelCallbackStub stub = Hybridge.alloc<ChannelCallbackStub>().ref;
     stub.metaObject = Pointer.fromFunction(_metaObject);
     stub.createUuid = Pointer.fromFunction(_createUuid);
     stub.createProxyObject = Pointer.fromFunction(_createProxyObject);

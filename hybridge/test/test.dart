@@ -1,12 +1,7 @@
 import 'dart:ffi';
 import 'dart:io';
 
-import '../lib/channel.dart';
-import '../lib/transport.dart';
-import '../lib/src/handleptr.dart';
-import '../lib/src/meta.dart';
-import '../lib/src/hybridge.dart';
-import '../lib/src/variant.dart';
+import 'package:hybridgedart/hybridge.dart';
 
 part 'test.g.dart';
 
@@ -20,6 +15,13 @@ class TestObject {
   int add(int d) {
     return x += d;
   }
+}
+
+abstract class ITestObject {
+  int get x;
+  set x(int value);
+  Future<int> inc();
+  Future<int> add(int d);
 }
 
 class FakeTransport extends Transport {
@@ -42,13 +44,19 @@ void main() {
   Channel cr = Channel();
   FakeTransport tr = FakeTransport(another: tp);
   cr.connectTo(tr, response: (objmap) {
-    var map = CMap.fromValue(objmap, VaueType.Object_).objectMap();
+    var map = CMap.fromValue(objmap, ValueType.Object_).proxyObjectMap();
+    for (var e in map.entries) {
+      stdout.writeln(e.key);
+      new ProxyTestObject(e.value).inc().then((value) {
+        print("inc() -> ${value}");
+      });
+    }
   });
-  tr.sendMessage('{"id":0,"type":3}');
-  tr.sendMessage('{"type":4}');
+  //tr.sendMessage('{"id":0,"type":3}');
+  //tr.sendMessage('{"type":4}');
   cp.timerEvent();
-  tr.sendMessage(
-      '{"id":1,"type":6, "object": "test", "method": 1, "args": []}');
-  tr.messageReceived(
-      '{"id":1,"type":6, "object": "test", "method": 2, "args": [4]}');
+  // tr.sendMessage(
+  //     '{"id":1,"type":6, "object": "test", "method": 1, "args": []}');
+  // tr.messageReceived(
+  //     '{"id":1,"type":6, "object": "test", "method": 2, "args": [4]}');
 }
