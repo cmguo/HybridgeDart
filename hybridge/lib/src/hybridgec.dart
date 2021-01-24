@@ -51,6 +51,17 @@ class Hybridge {
     return _allocBuffer.asFunction<d_allocBuffer>()(sizeOf<T>() * size).cast();
   }
 
+  static Pointer<Pointer<T>> allocPointerList<T extends NativeType>(
+      List<Pointer<T>> list) {
+    Pointer<Pointer<T>> array = _allocBuffer
+        .asFunction<d_allocBuffer>()(sizeOf<Pointer<T>>() * list.length)
+        .cast();
+    for (int i = 0; i < list.length; ++i) {
+      array[i] = list.elementAt(i);
+    }
+    return array;
+  }
+
   static Pointer<T> allocStruct<T extends Struct>() {
     return _allocBuffer.asFunction<d_allocBuffer>()(sizeOf<T>()).cast();
   }
@@ -89,10 +100,11 @@ class Hybridge {
     return p;
   }
 
-  static Pointer<Pointer<Void>> allocPointer(Pointer<Void> value) {
+  static Pointer<Pointer<T>> allocPointer<T extends NativeType>(
+      Pointer<T> value) {
     var p = _allocBuffer
-        .asFunction<d_allocBuffer>()(sizeOf<Pointer<Void>>())
-        .cast<Pointer<Void>>();
+        .asFunction<d_allocBuffer>()(sizeOf<Pointer<T>>())
+        .cast<Pointer<T>>();
     p.value = value;
     return p;
   }

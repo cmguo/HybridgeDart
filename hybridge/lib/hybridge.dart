@@ -5,3 +5,4 @@ export 'src/meta.dart';
 export 'src/hybridgec.dart';
 export 'src/proxyobject.dart';
 export 'src/handleptr.dart';
+export 'src/annotation.dart';

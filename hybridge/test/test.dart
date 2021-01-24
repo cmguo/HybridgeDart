@@ -1,7 +1,7 @@
 import 'dart:ffi';
 import 'dart:io';
 
-import 'package:hybridgedart/hybridge.dart';
+import 'package:hybridge/hybridge.dart';
 
 part 'test.g.dart';
 
@@ -44,7 +44,7 @@ void main() {
   Channel cr = Channel();
   FakeTransport tr = FakeTransport(another: tp);
   cr.connectTo(tr, response: (objmap) {
-    var map = CMap.fromValue(objmap, ValueType.Object_).proxyObjectMap();
+    var map = CMap.decode(objmap).proxyObjectMap();
     for (var e in map.entries) {
       stdout.writeln(e.key);
       new ProxyTestObject(e.value).inc().then((value) {

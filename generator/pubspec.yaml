@@ -1,5 +1,5 @@
 name: hybridge_generator
-description: hybridge generator is an dio client generator using source_gen
+description: hybridge generator is an hybridge client generator using source_gen
 version: 1.0.0+1
 
 homepage: https://github.com/cmguo/hybridge.dart/
@@ -9,11 +9,11 @@ environment:
   sdk: '>=2.7.0 <3.0.0'
 
 dependencies:
-  dio: ^3.0.1
   source_gen: ^0.9.4+2
   built_collection: ^4.2.0
   code_builder: ^3.2.0
-  tuple: ^1.0.2
+  hybridge: 
+    path: ../hybridge
   analyzer: any
   dart_style: ^1.0.0
   build: ^1.2.2

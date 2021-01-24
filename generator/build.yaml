@@ -1,5 +1,5 @@
 builders:
-  retrofit:
+  hybridge:
     target: ":hybridge"
     import: "package:hybridge_generator/hybridge_generator.dart"
     builder_factories: ["hybridgeBuilder"]

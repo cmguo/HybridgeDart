@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 
@@ -96,33 +97,46 @@ class OnSignalCallbackStub extends Struct {
 class ProxyObject {
   Pointer<Handle> handle;
   Pointer<ProxyObjectStub> stub;
+  Map<String, dynamic> _meta;
 
   ProxyObject(this.handle) {
     HandleSet.proxyObjects[handle] = this;
     stub = handle.ref.callback.cast();
+    var data = stub.ref.metaData.asFunction<d_metaData>()(handle);
+    String metaData = Utf8.fromUtf8(data);
+    _meta = jsonDecode(metaData);
+    Hybridge.freeBuffer(ValueType.None, data.cast<Void>());
   }
 
-  T readProperty<T>(String property, List<ValueType> types) {
+  T readProperty<T>(String property) {
+    List<dynamic> prop = (_meta["properties"] as List<dynamic>)
+        .firstWhere((p) => p[0] == property);
     Pointer<Void> value = stub.ref.readProperty.asFunction<d_readProperty>()(
         handle, Utf8.toUtf8(property));
-    T t = fromValue(types, value);
-    Hybridge.freeBuffer(types.first, value);
+    T t = fromValue(ValueType.values[prop[2]], value);
+    Hybridge.freeBuffer(ValueType.values[prop[2]], value);
     return t;
   }
 
-  bool writeProperty(String property, dynamic value, List<ValueType> types) {
-    Pointer<Void> t = toValue(types, value);
+  bool writeProperty(String property, dynamic value) {
+    List<dynamic> prop = (_meta["properties"] as List<dynamic>)
+        .firstWhere((p) => p[0] == property);
+    Pointer<Void> t = toValue(ValueType.values[prop[2]], value);
     return 0 !=
         stub.ref.writeProperty.asFunction<d_writeProperty>()(
             handle, Utf8.toUtf8(property), t);
   }
 
-  Future<T> invokeMethod<T>(
-      String method, Pointer<Pointer<Void>> args, List<ValueType> types) {
+  Future<T> invokeMethod<T>(String method, List<dynamic> args) {
+    List<dynamic> mehd =
+        (_meta["methods"] as List<dynamic>).firstWhere((p) => p[0] == method);
+    List<Pointer<Void>> argv = (mehd[5] as List<dynamic>)
+        .mapWithIndex((i, t) => toValue(ValueType.values[t], args[i]));
     var completer = Completer<T>();
     stub.ref.invokeMethod.asFunction<d_invokeMethod>()(
-        handle, Utf8.toUtf8(method), args, HandleSet.responses.alloc((result) {
-      completer.complete(fromValue(types, result));
+        handle, Utf8.toUtf8(method), Hybridge.allocPointerList(argv),
+        HandleSet.responses.alloc((result) {
+      completer.complete(fromValue(ValueType.values[mehd[4]], result));
     }));
     return completer.future;
   }
