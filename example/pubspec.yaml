@@ -1,0 +1,22 @@
+name: hybridge_example
+description: hybridge generator example
+version: 1.0.0+1
+
+homepage: https://github.com/cmguo/hybridge.dart/
+repository: https://github.com/cmguo/hybridge.dart/
+
+environment:
+  sdk: '>=2.7.0 <3.0.0'
+
+dependencies:
+  hybridge:
+  
+dev_dependencies:
+  hybridge_generator:
+  build_runner: ^1.4.0
+
+dependency_overrides:
+  hybridge:
+    path: ../hybridge
+  hybridge_generator:
+    path: ../generator
