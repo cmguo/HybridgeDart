@@ -98,7 +98,8 @@ abstract class MetaObject {
     List<dynamic> method = (_meta["methods"] as List<List<dynamic>>)
         .firstWhere((p) => p[2] == methodIndex);
     List<dynamic> argv = (method[5] as List<int>)
-        .mapWithIndex((i, t) => fromValue(ValueType.values[t], args[i]));
+        .mapWithIndex((i, t) => fromValue(ValueType.values[t], args[i]))
+        .toList();
     return toValue(ValueType.values[method[4]],
         invokeMethod(HandleSet.nativeObjects[object], methodIndex, argv));
   }

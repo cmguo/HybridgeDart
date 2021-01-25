@@ -6,7 +6,7 @@ import 'package:hybridge/hybridge.dart';
 class EmptyProxyProxy extends EmptyProxy {
   EmptyProxyProxy(this.proxy);
 
-  ProxyObject proxy;
+  final ProxyObject proxy;
 }
 ''',
   contains: true,
@@ -55,4 +55,18 @@ abstract class RenameMethodProxy {
 @Import()
 abstract class MethodArgsProxy {
   Future<int> x(int a, int b);
+}
+
+@ShouldGenerate(
+  r'''
+  @override
+  int get x => proxy.readProperty("x");
+  @override
+  set x(int value) => proxy.writeProperty("x", value);
+''',
+  contains: true,
+)
+@Import()
+abstract class FieldProxy {
+  int x;
 }

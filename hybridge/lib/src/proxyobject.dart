@@ -131,7 +131,8 @@ class ProxyObject {
     List<dynamic> mehd =
         (_meta["methods"] as List<dynamic>).firstWhere((p) => p[0] == method);
     List<Pointer<Void>> argv = (mehd[5] as List<dynamic>)
-        .mapWithIndex((i, t) => toValue(ValueType.values[t], args[i]));
+        .mapWithIndex((i, t) => toValue(ValueType.values[t], args[i]))
+        .toList();
     var completer = Completer<T>();
     stub.ref.invokeMethod.asFunction<d_invokeMethod>()(
         handle, Utf8.toUtf8(method), Hybridge.allocPointerList(argv),

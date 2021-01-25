@@ -47,8 +47,10 @@ void main() {
     var map = CMap.decode(objmap).proxyObjectMap();
     for (var e in map.entries) {
       stdout.writeln(e.key);
-      new ProxyTestObject(e.value).inc().then((value) {
+      ITestObject po = new ProxyTestObject(e.value);
+      po.inc().then((value) {
         print("inc() -> ${value}");
+        print("x: ${po.x}");
       });
     }
   });

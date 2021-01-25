@@ -300,9 +300,20 @@ class HybridgeImportGenerator extends HybridgeGenerator<hybirdge.Import> {
       c.fields.add(Field((f) {
         f.type = Reference("ProxyObject");
         f.name = "proxy";
+        f.modifier = FieldModifier.final$;
       }));
 
       c.constructors.add(_generateConstructor());
+
+      element.fields
+          .where((f) =>
+              !_isIgnore(f) && f.isPublic /*&& f.isAbstract*/ && !f.isStatic)
+          .forEach((f) {
+        c.methods.add(_generatePropertyGetterMethod(f));
+        if (!f.isConst) {
+          c.methods.add(_generatePropertySetterMethod(f));
+        }
+      });
 
       element.methods
           .where(
@@ -323,60 +334,40 @@ class HybridgeImportGenerator extends HybridgeGenerator<hybirdge.Import> {
         }));
       });
 
-  Method _generateReadPropertyMethod(Map<String, List<dynamic>> fields) =>
-      Method((m) {
+  Method _generatePropertyGetterMethod(FieldElement field) => Method((m) {
         m
-          ..returns = refer("dynamic")
-          ..name = "readProperty"
+          ..returns = refer(_displayString(field.type))
+          ..type = MethodType.getter
+          ..name = field.name
           ..annotations.add(CodeExpression(Code('override')))
-          ..requiredParameters.add(Parameter((p) {
-            p.name = "object";
-            p.type = refer("Object");
-          }))
-          ..requiredParameters.add(Parameter((p) {
-            p.name = "propertyIndex";
-            p.type = refer("int");
-          }))
-          ..body = _generateReadPropertyBody(fields);
+          ..lambda = true
+          ..body = _generatePropertyGetterBody(field);
       });
 
-  Code _generateReadPropertyBody(Map<String, List<dynamic>> fields) {
+  Code _generatePropertyGetterBody(FieldElement field) {
     final blocks = <Code>[];
-    fields.forEach((n, f) {
-      blocks.add(Code("if (propertyIndex == ${f[3]}) { return o.${n}; }"));
-    });
-    blocks.add(Code("return null;"));
+    String name = _name(field);
+    blocks.add(Code('proxy.readProperty("${name}")'));
     return Block.of(blocks);
   }
 
-  Method _generateWritePropertyMethod(Map<String, List<dynamic>> fields) =>
-      Method((m) {
+  Method _generatePropertySetterMethod(FieldElement field) => Method((m) {
         m
-          ..returns = refer("bool")
-          ..name = "writeProperty"
+          ..type = MethodType.setter
+          ..name = field.name
           ..annotations.add(CodeExpression(Code('override')))
           ..requiredParameters.add(Parameter((p) {
-            p.name = "object";
-            p.type = refer("Object");
-          }))
-          ..requiredParameters.add(Parameter((p) {
-            p.name = "propertyIndex";
-            p.type = refer("int");
-          }))
-          ..requiredParameters.add(Parameter((p) {
             p.name = "value";
-            p.type = refer("dynamic");
+            p.type = refer(_displayString(field.type));
           }))
-          ..body = _generateWritePropertyBody(fields);
+          ..lambda = true
+          ..body = _generatePropertySetterBody(field);
       });
 
-  Code _generateWritePropertyBody(Map<String, List<dynamic>> fields) {
+  Code _generatePropertySetterBody(FieldElement field) {
     final blocks = <Code>[];
-    fields.forEach((n, f) {
-      blocks.add(Code(
-          "if (propertyIndex == ${f[3]}) { o.${n} = value; return true; }"));
-    });
-    blocks.add(Code("return false;"));
+    String name = _name(field);
+    blocks.add(Code('proxy.writeProperty("${name}", value)'));
     return Block.of(blocks);
   }
 
