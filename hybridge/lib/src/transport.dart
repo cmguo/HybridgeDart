@@ -23,6 +23,6 @@ class Transport {
   }
 
   void sendMessage(String message) {
-    stdout.writeln("sendMessage: ${message}");
+    stdout.writeln("sendMessage: $message");
   }
 }

@@ -24,9 +24,9 @@ abstract class ITestObject {
   Future<int> add(int d);
 }
 
-class FakeTransport extends Transport {
+class PairTransport extends Transport {
   Transport another;
-  FakeTransport({FakeTransport another}) {
+  PairTransport({PairTransport another}) {
     this.another = another;
     if (another != null) another.another = this;
   }
@@ -39,17 +39,24 @@ void main() {
   MetaObject.add(TestObject, TestObjectMetaObject());
   Channel cp = Channel();
   cp.registerObject("test", TestObject());
-  FakeTransport tp = FakeTransport();
-  cp.connectTo(tp);
+  // FlutterTransport
+  cp.connectTo(FlutterTransport());
+  // WebSocketTransport
+  //   you can test in http://coolaf.com/tool/chattest
+  //   with ws://127.0.0.1:8090/hybridge
+  WebSocketTransport.listen(cp);
   Channel cr = Channel();
-  FakeTransport tr = FakeTransport(another: tp);
+  // PairTransport
+  PairTransport tp = PairTransport();
+  cp.connectTo(tp);
+  PairTransport tr = PairTransport(another: tp);
   cr.connectTo(tr, response: (objmap) {
     var map = CMap.decode(objmap).proxyObjectMap();
     for (var e in map.entries) {
       stdout.writeln(e.key);
       ITestObject po = new ProxyTestObject(e.value);
       po.inc().then((value) {
-        print("inc() -> ${value}");
+        print("inc() -> $value");
         print("x: ${po.x}");
       });
     }
