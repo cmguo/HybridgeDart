@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:mirrors';
 
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
@@ -135,6 +136,7 @@ class HybridgeExportGenerator extends HybridgeGenerator<hybirdge.Export> {
         ..types.addAll(element.typeParameters.map((e) => refer(e.name)))
         ..extend = Reference("MetaObject");
 
+      c.methods.add(_generateRegister());
       c.constructors.add(_generateConstructor(jsonEncode(meta)));
 
       if (!_properties.isEmpty) {
@@ -170,6 +172,14 @@ class HybridgeExportGenerator extends HybridgeGenerator<hybirdge.Export> {
                 _methodParameterTypes(m),
                 _methodParameterNames(m)
               ])));
+
+  Method _generateRegister() => Method((m) {
+        m
+          ..name = "register"
+          ..static = true
+          ..body = Code(
+              "MetaObject.register(${_className}, ${_className}MetaObject());");
+      });
 
   Constructor _generateConstructor(String meta) => Constructor((c) {
         c.initializers.add(Code("super(${meta})"));
@@ -303,6 +313,7 @@ class HybridgeImportGenerator extends HybridgeGenerator<hybirdge.Import> {
         f.modifier = FieldModifier.final$;
       }));
 
+      c.methods.add(_generateRegister(className, c.name));
       c.constructors.add(_generateConstructor());
 
       element.fields
@@ -326,6 +337,14 @@ class HybridgeImportGenerator extends HybridgeGenerator<hybirdge.Import> {
     final emitter = DartEmitter();
     return DartFormatter().format('${classBuilder.accept(emitter)}');
   }
+
+  Method _generateRegister(String name, String proxyName) => Method((m) {
+        m
+          ..name = "register"
+          ..static = true
+          ..body = Code(
+              'ProxyObject.register("${name}", (proxy) => $proxyName(proxy));');
+      });
 
   Constructor _generateConstructor() => Constructor((c) {
         c.requiredParameters.add(Parameter((p) {

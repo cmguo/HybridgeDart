@@ -7,6 +7,10 @@ class EmptyProxyProxy extends EmptyProxy {
   EmptyProxyProxy(this.proxy);
 
   final ProxyObject proxy;
+
+  static register() {
+    ProxyObject.register("EmptyProxy", (proxy) => EmptyProxyProxy(proxy));
+  }
 }
 ''',
   contains: true,

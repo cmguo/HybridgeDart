@@ -5,6 +5,10 @@ import 'package:hybridge/hybridge.dart';
 class EmptyObjectMetaObject extends MetaObject {
   EmptyObjectMetaObject()
       : super({"class": "EmptyObject", "properties": [], "methods": []});
+
+  static register() {
+    MetaObject.register(EmptyObject, EmptyObjectMetaObject());
+  }
 }
 ''', contains: true)
 @Export()
@@ -14,6 +18,10 @@ class EmptyObject {}
 class RenameEmptyObjectMetaObject extends MetaObject {
   RenameEmptyObjectMetaObject()
       : super({"class": "xxx", "properties": [], "methods": []});
+
+  static register() {
+    MetaObject.register(RenameEmptyObject, RenameEmptyObjectMetaObject());
+  }
 }
 ''', contains: true)
 @Export(className: "xxx")
