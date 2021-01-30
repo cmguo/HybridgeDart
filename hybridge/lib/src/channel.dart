@@ -8,6 +8,7 @@ import 'handleptr.dart';
 import 'proxyobject.dart';
 import 'meta.dart';
 import 'transport.dart';
+import 'variant.dart';
 
 class Channel {
   static Pointer<ChannelStub> stub = Hybridge.channelStub;
@@ -42,7 +43,13 @@ class Channel {
         handle, block ? 1 : 0);
   }
 
-  void connectTo(Transport transport, {OnResult response = null}) {
+  void connectTo(Transport transport,
+      {void callback(Map<String, Object> objects) = null}) {
+    OnResult response = callback == null
+        ? null
+        : (objmap) => callback(CMap.decode(objmap)
+            .proxyObjectMap()
+            .map((key, value) => MapEntry(key, value.toObject())));
     stub.ref.connectTo.asFunction<d_connectTo>()(handle, transport.handle,
         response == null ? nullptr : HandleSet.responses.alloc(response));
   }

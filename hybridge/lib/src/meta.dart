@@ -60,7 +60,7 @@ class MetaObjectCallbackStub extends Struct {
 abstract class MetaObject {
   static final Map<Type, MetaObject> metaObjs = Map();
 
-  static add(Type type, MetaObject metaObj) {
+  static register(Type type, MetaObject metaObj) {
     metaObjs[type] = metaObj;
   }
 

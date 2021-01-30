@@ -36,7 +36,8 @@ class PairTransport extends Transport {
 }
 
 void main() {
-  MetaObject.add(TestObject, TestObjectMetaObject());
+  TestObjectMetaObject.register();
+  ProxyTestObject.register();
   Channel cp = Channel();
   cp.registerObject("test", TestObject());
   // FlutterTransport
@@ -50,16 +51,12 @@ void main() {
   PairTransport tp = PairTransport();
   cp.connectTo(tp);
   PairTransport tr = PairTransport(another: tp);
-  cr.connectTo(tr, response: (objmap) {
-    var map = CMap.decode(objmap).proxyObjectMap();
-    for (var e in map.entries) {
-      stdout.writeln(e.key);
-      ITestObject po = new ProxyTestObject(e.value);
-      po.inc().then((value) {
-        print("inc() -> $value");
-        print("x: ${po.x}");
-      });
-    }
+  cr.connectTo(tr, callback: (objects) {
+    ITestObject po = objects["test"];
+    po.inc().then((value) {
+      print("inc() -> $value");
+      print("x: ${po.x}");
+    });
   });
   //tr.sendMessage('{"id":0,"type":3}');
   //tr.sendMessage('{"type":4}');

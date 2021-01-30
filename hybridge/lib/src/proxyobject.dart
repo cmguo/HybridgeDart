@@ -95,6 +95,12 @@ class OnSignalCallbackStub extends Struct {
 }
 
 class ProxyObject {
+  static final Map<String, Object Function(ProxyObject proxy)> creators = Map();
+
+  static register(String type, Object creator(ProxyObject proxy)) {
+    creators[type] = creator;
+  }
+
   Pointer<Handle> handle;
   Pointer<ProxyObjectStub> stub;
   Map<String, dynamic> _meta;
@@ -106,6 +112,14 @@ class ProxyObject {
     String metaData = Utf8.fromUtf8(data);
     _meta = jsonDecode(metaData);
     Hybridge.freeBuffer(ValueType.None, data.cast<Void>());
+  }
+
+  String className() {
+    return _meta["class"];
+  }
+
+  Object toObject() {
+    return creators[className()](this);
   }
 
   T readProperty<T>(String property) {
