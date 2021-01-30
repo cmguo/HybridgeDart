@@ -4,7 +4,7 @@ import 'package:hybridge/hybridge.dart';
 @ShouldGenerate(r'''
 class EmptyObjectMetaObject extends MetaObject {
   EmptyObjectMetaObject()
-      : super('{"class":"EmptyObject","properties":[],"methods":[]}');
+      : super({"class": "EmptyObject", "properties": [], "methods": []});
 }
 ''', contains: true)
 @Export()
@@ -13,7 +13,7 @@ class EmptyObject {}
 @ShouldGenerate(r'''
 class RenameEmptyObjectMetaObject extends MetaObject {
   RenameEmptyObjectMetaObject()
-      : super('{"class":"xxx","properties":[],"methods":[]}');
+      : super({"class": "xxx", "properties": [], "methods": []});
 }
 ''', contains: true)
 @Export(className: "xxx")
@@ -21,7 +21,13 @@ class RenameEmptyObject {}
 
 @ShouldGenerate(
   r'''
-'{"class":"PropertyObject","properties":[["x",1,3,0,-1]],"methods":[]}');
+      : super({
+          "class": "PropertyObject",
+          "properties": [
+            ["x", 1, 3, 0, -1]
+          ],
+          "methods": []
+        });
 ''',
   contains: true,
 )
@@ -59,7 +65,13 @@ class PropertyObject2 {
 
 @ShouldGenerate(
   r'''
-'{"class":"RenamePropertyObject","properties":[["xxx",1,3,0,-1]],"methods":[]}');
+      : super({
+          "class": "RenamePropertyObject",
+          "properties": [
+            ["xxx", 1, 3, 0, -1]
+          ],
+          "methods": []
+        });
 ''',
   contains: true,
 )
@@ -90,7 +102,13 @@ class RenamePropertyObject2 {
 
 @ShouldGenerate(
   r'''
-'{"class":"PropertyTypeObject","properties":[["xxx",1,2,0,-1]],"methods":[]}');
+      : super({
+          "class": "PropertyTypeObject",
+          "properties": [
+            ["xxx", 1, 2, 0, -1]
+          ],
+          "methods": []
+        });
 ''',
   contains: true,
 )
@@ -103,7 +121,13 @@ class PropertyTypeObject {
 
 @ShouldGenerate(
   r'''
-'{"class":"MethodObject","properties":[],"methods":[["x",1,0,"",3,[],[]]]}');
+      : super({
+          "class": "MethodObject",
+          "properties": [],
+          "methods": [
+            ["x", 1, 0, "", 3, [], []]
+          ]
+        });
 ''',
   contains: true,
 )
@@ -119,7 +143,7 @@ class MethodObject {
   @override
   dynamic invokeMethod(Object object, int methodIndex, List<dynamic> args) {
     MethodObject2 o = object;
-    if (propertyIndex == 0) {
+    if (methodIndex == 0) {
       return o.x();
     }
     return null;
@@ -136,7 +160,21 @@ class MethodObject2 {
 
 @ShouldGenerate(
   r'''
-'{"class":"MethodArgsObject","properties":[],"methods":[["x",1,0,"",3,[3,3],["a","b"]]]}');
+      : super({
+          "class": "MethodArgsObject",
+          "properties": [],
+          "methods": [
+            [
+              "x",
+              1,
+              0,
+              "",
+              3,
+              [3, 3],
+              ["a", "b"]
+            ]
+          ]
+        });
 ''',
   contains: true,
 )
@@ -152,7 +190,7 @@ class MethodArgsObject {
   @override
   dynamic invokeMethod(Object object, int methodIndex, List<dynamic> args) {
     MethodArgsObject2 o = object;
-    if (propertyIndex == 0) {
+    if (methodIndex == 0) {
       return o.x(args[0], args[1]);
     }
     return null;

@@ -172,7 +172,7 @@ class HybridgeExportGenerator extends HybridgeGenerator<hybirdge.Export> {
               ])));
 
   Constructor _generateConstructor(String meta) => Constructor((c) {
-        c.initializers.add(Code("super('${meta}')"));
+        c.initializers.add(Code("super(${meta})"));
       });
 
   Method _generateReadPropertyMethod(Map<String, List<dynamic>> fields) =>
@@ -261,8 +261,8 @@ class HybridgeExportGenerator extends HybridgeGenerator<hybirdge.Export> {
     methods.forEach((n, m) {
       String args =
           (m[5] as List<int>).mapWithIndex((i, a) => "args[${i}]").join(", ");
-      blocks.add(
-          Code("if (propertyIndex == ${m[2]}) { return o.${n}(${args}); }"));
+      blocks
+          .add(Code("if (methodIndex == ${m[2]}) { return o.${n}(${args}); }"));
     });
     blocks.add(Code("return null;"));
     return Block.of(blocks);
