@@ -3,7 +3,7 @@
 
 通过 BasicMessageChannel 与 native （Android、iOS）通讯，可以实现 flutter 与 native 之间的相互调用。
 
-举例，在 dart 中有 ExampleObject 这样一个类 (example.dart)
+举例，在 dart 或者 native 中有 ExampleObject 这样一个类 (example.dart)
 ```dart
 class ExampleObject {
   int x = 0;
@@ -47,7 +47,9 @@ dev_dependencies:
 # 接收 Native 对象
 如果想在 flutter 中访问 native 的对象
 * 首先，在 Native 端发布对象
+
   使用各平台自己的 Hybridge 库，通过相同名称的 FlutterTransport 以及 Channel 来发布对象。
+
 * 在 Dart 声明兼容的对象接口
 ```dart
 abstract class IExampleObject {
