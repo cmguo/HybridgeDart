@@ -1,5 +1,5 @@
 # HybridgeDart
-支持 dart 与其他开发语言相互调用的工具
+支持 dart 与其他开发语言相互调用的工具，是 [Hybridge](https://github.com/cmguo/Hybridge) 的一部分。
 
 通过 BasicMessageChannel 与 native （Android、iOS）通讯，可以实现 flutter 与 native 之间的相互调用。
 
