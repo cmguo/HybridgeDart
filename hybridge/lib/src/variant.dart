@@ -15,9 +15,7 @@ enum ValueType {
   String,
   Array_,
   Map_,
-  Object_,
-  NativeObject,
-  ProxyObject,
+  Object_
 }
 
 class CHeader extends Struct {
@@ -103,10 +101,12 @@ extension VariantList on List<CEntry> {
   }
 
   List<Object> nativeObjectList() {
+    // Pointer<Handle> -> Object
     return map((e) => HandleSet.nativeObjects[e.value]);
   }
 
   List<ProxyObject> proxyObjectList() {
+    // Pointer<Handle> -> ProxyObject
     return map((e) => HandleSet.proxyObjects[e.value]);
   }
 }
@@ -119,6 +119,7 @@ extension NativeList<T> on List<T> {
 
 extension NativeObjectList on List<Object> {
   List<CEntry> variantList() {
+    // Object -> Pointer<Handle>
     return map((e) =>
         CEntry(ValueType.Object_, HandleSet.nativeObjects.alloc(e).cast()));
   }
@@ -126,6 +127,7 @@ extension NativeObjectList on List<Object> {
 
 extension ProxyObjectList on List<ProxyObject> {
   List<CEntry> variantList() {
+    // ProxyObject -> Pointer<Handle>
     return map((e) =>
         CEntry(ValueType.Object_, HandleSet.proxyObjects.alloc(e).cast()));
   }
@@ -185,10 +187,12 @@ extension VariantMap on Map<String, CEntry> {
   }
 
   Map<String, Object> nativeObjectMap() {
+    // Pointer<Handle> -> Object
     return map((k, v) => MapEntry(k, HandleSet.nativeObjects[v.value]));
   }
 
   Map<String, ProxyObject> proxyObjectMap() {
+    // Pointer<Handle> -> ProxyObject
     return map((k, v) => MapEntry(k, HandleSet.proxyObjects[v.value]));
   }
 }
@@ -201,6 +205,7 @@ extension NativeMap<T> on Map<String, T> {
 
 extension NativeObjectMap on Map<String, Object> {
   Map<String, CEntry> variantMap() {
+    // Object -> Pointer<Handle>
     return map((k, v) => MapEntry(
         k, CEntry(ValueType.Object_, HandleSet.nativeObjects.alloc(v).cast())));
   }
@@ -208,6 +213,7 @@ extension NativeObjectMap on Map<String, Object> {
 
 extension ProxyObjectMap on Map<String, ProxyObject> {
   Map<String, CEntry> variantMap() {
+    // ProxyObject -> Pointer<Handle>
     return map((k, v) => MapEntry(
         k, CEntry(ValueType.Object_, HandleSet.proxyObjects.alloc(v).cast())));
   }
@@ -318,6 +324,7 @@ class MapConverter extends Converter {
   }
 }
 
+// convert from/to Pointer<Handle>
 class ObjectConverter extends Converter {
   @override
   fromValue(Pointer<Void> value) {
@@ -327,32 +334,6 @@ class ObjectConverter extends Converter {
   @override
   Pointer<Void> toValue(variant) {
     return Hybridge.allocPointer(variant as Pointer<Handle>).cast();
-  }
-}
-
-class NativeObjectConverter extends Converter {
-  @override
-  fromValue(Pointer<Void> value) {
-    return HandleSet.nativeObjects[value.cast<Pointer<Handle>>().value];
-  }
-
-  @override
-  Pointer<Void> toValue(variant) {
-    return Hybridge.allocPointer(HandleSet.nativeObjects.alloc(variant).cast())
-        .cast();
-  }
-}
-
-class ProxyObjectConverter extends Converter {
-  @override
-  fromValue(Pointer<Void> value) {
-    return HandleSet.proxyObjects[value.cast<Pointer<Handle>>().value];
-  }
-
-  @override
-  Pointer<Void> toValue(variant) {
-    return Hybridge.allocPointer(HandleSet.proxyObjects.alloc(variant).cast())
-        .cast();
   }
 }
 
@@ -366,9 +347,7 @@ final converters = [
   StringConverter(),
   ArrayConverter(),
   MapConverter(),
-  ObjectConverter(),
-  NativeObjectConverter(),
-  ProxyObjectConverter()
+  ObjectConverter()
 ];
 
 dynamic fromValue(ValueType type, Pointer<Void> value) {

@@ -59,36 +59,34 @@ class ChannelCallbackStub extends Struct {
 
 /* Channel */
 
-typedef c_createChannel = Pointer<Void> Function(Pointer<Handle> handle);
 typedef c_registerObject = Void Function(
-    Pointer<Void> channel, Pointer<Utf8> name, Pointer<Void> object);
+    Pointer<Handle> channel, Pointer<Utf8> name, Pointer<Void> object);
 typedef c_deregisterObject = Void Function(
-    Pointer<Void> channel, Pointer<Void> object);
-typedef c_blockUpdates = IntPtr Function(Pointer<Void> channel);
-typedef c_setBlockUpdates = Void Function(Pointer<Void> channel, IntPtr block);
-typedef c_connectTo = Void Function(
-    Pointer<Void> channel, Pointer<Void> transport, Pointer<Handle> response);
+    Pointer<Handle> channel, Pointer<Void> object);
+typedef c_blockUpdates = IntPtr Function(Pointer<Handle> channel);
+typedef c_setBlockUpdates = Void Function(
+    Pointer<Handle> channel, IntPtr block);
+typedef c_connectTo = Void Function(Pointer<Handle> channel,
+    Pointer<Handle> transport, Pointer<Handle> response);
 typedef c_disconnectFrom = Void Function(
-    Pointer<Void> channel, Pointer<Void> transport);
-typedef c_timerEvent = Void Function(Pointer<Void> channel);
-typedef c_freeChannel = Void Function(Pointer<Void> channel);
+    Pointer<Handle> channel, Pointer<Handle> transport);
+typedef c_timerEvent = Void Function(Pointer<Handle> channel);
+typedef c_freeChannel = Void Function(Pointer<Handle> channel);
 
-typedef d_createChannel = Pointer<Void> Function(Pointer<Handle> handle);
 typedef d_registerObject = void Function(
-    Pointer<Void> channel, Pointer<Utf8> name, Pointer<Void> object);
+    Pointer<Handle> channel, Pointer<Utf8> name, Pointer<Void> object);
 typedef d_deregisterObject = void Function(
-    Pointer<Void> channel, Pointer<Void> object);
-typedef d_blockUpdates = int Function(Pointer<Void> channel);
-typedef d_setBlockUpdates = void Function(Pointer<Void> channel, int block);
-typedef d_connectTo = void Function(
-    Pointer<Void> channel, Pointer<Void> transport, Pointer<Handle> response);
+    Pointer<Handle> channel, Pointer<Void> object);
+typedef d_blockUpdates = int Function(Pointer<Handle> channel);
+typedef d_setBlockUpdates = void Function(Pointer<Handle> channel, int block);
+typedef d_connectTo = void Function(Pointer<Handle> channel,
+    Pointer<Handle> transport, Pointer<Handle> response);
 typedef d_disconnectFrom = void Function(
-    Pointer<Void> channel, Pointer<Void> transport);
-typedef d_timerEvent = void Function(Pointer<Void> channel);
-typedef d_freeChannel = void Function(Pointer<Void> channel);
+    Pointer<Handle> channel, Pointer<Handle> transport);
+typedef d_timerEvent = void Function(Pointer<Handle> channel);
+typedef d_freeChannel = void Function(Pointer<Handle> channel);
 
 class ChannelStub extends Struct {
-  Pointer<NativeFunction<c_createChannel>> create;
   Pointer<NativeFunction<c_registerObject>> registerObject;
   Pointer<NativeFunction<c_deregisterObject>> deregisterObject;
   Pointer<NativeFunction<c_blockUpdates>> blockUpdates;

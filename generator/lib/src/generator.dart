@@ -157,7 +157,7 @@ class HybridgeExportGenerator extends HybridgeGenerator<hybirdge.Export> {
           .where((f) =>
               !_isIgnore(f) && f.isPublic && !f.isAbstract && !f.isStatic)
           .mapWithIndex((i, f) => MapEntry(
-              f.name, [_name(f), f.isConst ? 3 : 1, _fieldType(f), i, -1])));
+              f.name, [_name(f), f.isConst ? 3 : 1, i, _fieldType(f), -1])));
 
   Map<String, List<dynamic>> _parseMethods(ClassElement element) =>
       Map.fromEntries(element.methods
@@ -206,7 +206,7 @@ class HybridgeExportGenerator extends HybridgeGenerator<hybirdge.Export> {
     final blocks = <Code>[];
     blocks.add(Code("${_className} o = object;"));
     fields.forEach((n, f) {
-      blocks.add(Code("if (propertyIndex == ${f[3]}) { return o.${n}; }"));
+      blocks.add(Code("if (propertyIndex == ${f[2]}) { return o.${n}; }"));
     });
     blocks.add(Code("return null;"));
     return Block.of(blocks);
@@ -238,7 +238,7 @@ class HybridgeExportGenerator extends HybridgeGenerator<hybirdge.Export> {
     blocks.add(Code("${_className} o = object;"));
     fields.forEach((n, f) {
       blocks.add(Code(
-          "if (propertyIndex == ${f[3]}) { o.${n} = value; return true; }"));
+          "if (propertyIndex == ${f[2]}) { o.${n} = value; return true; }"));
     });
     blocks.add(Code("return false;"));
     return Block.of(blocks);

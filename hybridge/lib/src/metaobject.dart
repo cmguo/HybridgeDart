@@ -8,6 +8,7 @@ import 'hybridgec.dart';
 
 /* MetaObject Callback */
 
+typedef f_super = Pointer<Handle> Function(Pointer<Handle> handle);
 typedef f_metaData = Pointer<Utf8> Function(Pointer<Handle> handle);
 typedef f_readProperty = Pointer<Void> Function(
     Pointer<Handle> handle, Pointer<Handle> object, IntPtr propertyIndex);
@@ -17,6 +18,10 @@ typedef f_invokeMethod = Pointer<Void> Function(Pointer<Handle> handle,
     Pointer<Handle> object, IntPtr methodIndex, Pointer<Pointer<Void>> args);
 
 class MetaObjectCallbackStub extends Struct {
+  static Pointer<Handle> _super(Pointer<Handle> handle) {
+    return nullptr;
+  }
+
   static Pointer<Utf8> _metaData(Pointer<Handle> handle) {
     return HandleSet.metaObjects[handle].metaData;
   }
@@ -40,6 +45,7 @@ class MetaObjectCallbackStub extends Struct {
         ._invokeMethod(object, methodIndex, args);
   }
 
+  Pointer<NativeFunction<f_super>> super_;
   Pointer<NativeFunction<f_metaData>> metaData;
   Pointer<NativeFunction<f_readProperty>> readProperty;
   Pointer<NativeFunction<f_writeProperty>> writeProperty;
@@ -47,6 +53,7 @@ class MetaObjectCallbackStub extends Struct {
 
   factory MetaObjectCallbackStub.alloc() {
     MetaObjectCallbackStub stub = Hybridge.alloc<MetaObjectCallbackStub>().ref;
+    stub.super_ = Pointer.fromFunction(_super);
     stub.metaData = Pointer.fromFunction(_metaData);
     stub.readProperty = Pointer.fromFunction(_readProperty);
     stub.writeProperty = Pointer.fromFunction(_writeProperty, 0);
@@ -80,17 +87,17 @@ abstract class MetaObject {
 
   Pointer<Void> _readProperty(Pointer<Handle> object, int propertyIndex) {
     List<dynamic> prop = (_meta["properties"] as List<List<dynamic>>)
-        .firstWhere((p) => p[3] == propertyIndex);
-    return toValue(ValueType.values[prop[2]],
+        .firstWhere((p) => p[2] == propertyIndex);
+    return toValue(ValueType.values[prop[3]],
         readProperty(HandleSet.nativeObjects[object], propertyIndex));
   }
 
   bool _writeProperty(
       Pointer<Handle> object, int propertyIndex, Pointer<Void> value) {
     List<dynamic> prop = (_meta["properties"] as List<List<dynamic>>)
-        .firstWhere((p) => p[3] == propertyIndex);
+        .firstWhere((p) => p[2] == propertyIndex);
     return writeProperty(HandleSet.nativeObjects[object], propertyIndex,
-        fromValue(ValueType.values[prop[2]], value));
+        fromValue(ValueType.values[prop[3]], value));
   }
 
   Pointer<Void> _invokeMethod(

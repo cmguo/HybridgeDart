@@ -6,14 +6,13 @@ import 'channels.dart';
 import 'hybridgec.dart';
 import 'handleptr.dart';
 import 'proxyobject.dart';
-import 'meta.dart';
+import 'metaobject.dart';
 import 'transport.dart';
 import 'variant.dart';
 
 class Channel {
-  static Pointer<ChannelStub> stub = Hybridge.channelStub;
-
-  Pointer<Void> handle;
+  Pointer<Handle> handle;
+  Pointer<ChannelStub> stub;
   Pointer<Handle> callback;
 
   int id;
@@ -21,7 +20,8 @@ class Channel {
 
   Channel() {
     callback = HandleSet.channels.alloc(this);
-    handle = stub.ref.create.asFunction<d_createChannel>()(callback);
+    handle = Hybridge.createChannel.asFunction<d_createChannel>()(callback);
+    stub = handle.ref.callback.cast();
   }
 
   void registerObject(String name, Object object) {

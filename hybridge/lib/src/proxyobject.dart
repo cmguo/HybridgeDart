@@ -127,15 +127,15 @@ class ProxyObject {
         .firstWhere((p) => p[0] == property);
     Pointer<Void> value = stub.ref.readProperty.asFunction<d_readProperty>()(
         handle, Utf8.toUtf8(property));
-    T t = fromValue(ValueType.values[prop[2]], value);
-    Hybridge.freeBuffer(ValueType.values[prop[2]], value);
+    T t = fromValue(ValueType.values[prop[3]], value);
+    Hybridge.freeBuffer(ValueType.values[prop[3]], value);
     return t;
   }
 
   bool writeProperty(String property, dynamic value) {
     List<dynamic> prop = (_meta["properties"] as List<dynamic>)
         .firstWhere((p) => p[0] == property);
-    Pointer<Void> t = toValue(ValueType.values[prop[2]], value);
+    Pointer<Void> t = toValue(ValueType.values[prop[3]], value);
     return 0 !=
         stub.ref.writeProperty.asFunction<d_writeProperty>()(
             handle, Utf8.toUtf8(property), t);

@@ -7,14 +7,14 @@ import 'transports.dart';
 import 'handleptr.dart';
 
 class Transport {
-  static Pointer<TransportStub> stub = Hybridge.transportStub;
-
-  Pointer<void> handle;
+  Pointer<Handle> handle;
+  Pointer<TransportStub> stub;
   Pointer<Handle> callback;
 
   Transport() {
     callback = HandleSet.transports.alloc(this);
-    handle = stub.ref.create.asFunction<d_createTransport>()(callback);
+    handle = Hybridge.createTransport.asFunction<d_createTransport>()(callback);
+    stub = handle.ref.callback.cast();
   }
 
   void messageReceived(String message) {

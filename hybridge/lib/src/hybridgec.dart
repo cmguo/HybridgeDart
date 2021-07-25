@@ -1,15 +1,18 @@
 import 'dart:io' show Platform;
 import 'dart:ffi';
 
-import 'channels.dart';
-import 'transports.dart';
 import 'variant.dart';
+import 'handleptr.dart';
 
+typedef c_createChannel = Pointer<Handle> Function(Pointer<Handle> handle);
+typedef c_createTransport = Pointer<Handle> Function(Pointer<Handle> handle);
 typedef c_alloc = Pointer<Void> Function(IntPtr size);
 typedef c_free = Void Function(Pointer<Void> ptr);
 typedef c_allocBuffer = Pointer<Void> Function(IntPtr size);
 typedef c_freeBuffer = Void Function(IntPtr type, Pointer<Void> buffer);
 
+typedef d_createChannel = Pointer<Handle> Function(Pointer<Handle> handle);
+typedef d_createTransport = Pointer<Handle> Function(Pointer<Handle> handle);
 typedef d_alloc = Pointer<Void> Function(int size);
 typedef d_free = void Function(Pointer<Void> ptr);
 typedef d_allocBuffer = Pointer<Void> Function(int size);
@@ -19,8 +22,11 @@ class Hybridge {
   static final instance = Hybridge();
   static final lib = DynamicLibrary.open(libpath());
 
-  static Pointer<ChannelStub> channelStub = lib.lookup("channelStub");
-  static Pointer<TransportStub> transportStub = lib.lookup("transportStub");
+  static Pointer<NativeFunction<c_createChannel>> createChannel =
+      lib.lookup("hybridgeCreateChannel");
+  static Pointer<NativeFunction<c_createTransport>> createTransport =
+      lib.lookup("hybridgeCreateTransport");
+  static Pointer<NativeFunction> transportStub = lib.lookup("transportStub");
   static Pointer<NativeFunction<c_alloc>> _alloc = lib.lookup("hybridgeAlloc");
   static Pointer<NativeFunction<c_free>> _free = lib.lookup("hybridgeFree");
   static Pointer<NativeFunction<c_allocBuffer>> _allocBuffer =

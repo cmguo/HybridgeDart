@@ -5,7 +5,7 @@ import 'proxyobject.dart';
 import 'channels.dart';
 import 'transports.dart';
 import 'objects.dart';
-import 'meta.dart';
+import 'metaobject.dart';
 import 'channel.dart';
 import 'transport.dart';
 

@@ -25,18 +25,15 @@ class TransportCallbackStub extends Struct {
 
 /* Transport */
 
-typedef c_createTransport = Pointer<Void> Function(Pointer<Handle> handle);
 typedef c_messageReceived = Void Function(
-    Pointer<Void> Transport, Pointer<Utf8> message);
-typedef c_freeTransport = Void Function(Pointer<Void> Transport);
+    Pointer<Handle> Transport, Pointer<Utf8> message);
+typedef c_freeTransport = Void Function(Pointer<Handle> transport);
 
-typedef d_createTransport = Pointer<Void> Function(Pointer<Handle> handle);
 typedef d_messageReceived = void Function(
-    Pointer<Void> Transport, Pointer<Utf8> message);
-typedef d_freeTransport = void Function(Pointer<Void> Transport);
+    Pointer<Handle> Transport, Pointer<Utf8> message);
+typedef d_freeTransport = void Function(Pointer<Handle> transport);
 
 class TransportStub extends Struct {
-  Pointer<NativeFunction<c_createTransport>> create;
   Pointer<NativeFunction<c_messageReceived>> messageReceived;
   Pointer<NativeFunction<c_freeTransport>> free;
 }
